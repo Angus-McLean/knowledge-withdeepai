@@ -147,8 +147,9 @@ function CytoComponent() {
 
                 if (cyRef.current.nodes().length > 0) {
                     setTimeout(() => {
+                        console.log('STARTING LAYOUT', layout);
                         cyRef.current.layout(layout).run()
-                    }, 1000);
+                    }, 5000);
                 } else {
                     cyRef.current.layout(layout).run()
                 }
