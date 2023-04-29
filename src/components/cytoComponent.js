@@ -145,6 +145,7 @@ function CytoComponent() {
             if (cyRef.current) { 
                 
                 cyRef.current.zoom(0.03)
+                cyRef.current.center()
                 updateNodeOpacity(cyRef.current, 1);
                 updateNodeClasses(cyRef.current);
 
@@ -216,42 +217,41 @@ function CytoComponent() {
 }
 
 function fetchSubTopics(node) {
+    var Data = window.Data
+    var cy = window.cyRef.current
     // path to url
     // All Knowledge > Social Sciences > Psychology
     const topic_path = node.data('path');
     const url = rootPath + topic_path.split(' > ').join('/') + '/' + node.data('id') + '/data.json';
-    fetchAndAddNodes(window.cyRef.current, url);
-}
-window.fetchSubTopics = fetchSubTopics;
+    // fetchAndAddNodes(window.cyRef.current, url);
 
-function fetchAndAddNodes(cy, topic_url='/knowledge_atlas/All Knowledge/Social Sciences/Psychology/Industrial-Organizational Psychology/data.json') {
-    var Data = window.Data
-    // var cy = window.cyRef.current
-    
-    Data.getData(topic_url).then(res => {
+    Data.getData(url).then(res => {
         cy.nodes().forEach(node => node.lock());
-        cy.add(Data.getCytoData(res, 5));
+
+
+        var newCytoData = Data.getCytoData(res, 5);
+        
+        const bb = node.position();
+        newCytoData.forEach(n => {
+            if(n.target || n.source) { 
+                return;
+            }
+            // n['data']['parent'] = node.data('id');
+            // set x and y
+            
+            // const x = bb.x + (Math.random()*SCALE);
+            // const y = bb.y + (Math.random()*SCALE);
+            n['position'] = { x:bb.x, y:bb.y };
+        })
+        cy.add(newCytoData);
         updateNodeOpacity(cy, 1);
         updateNodeClasses(cy);
         cy.layout(layout).run();
         cy.nodes().forEach(node => node.unlock());
         return res
     })
-    
-    
-    // Data.getData(topic_url).then(res => {
-    //     console.log('fetchAndAddNodes', res)
-    //     cy.nodes().forEach(node => node.lock());
-        
-    //     cy.add(Data.getCytoData(res, 5));
-    //     updateNodeOpacity(cy, 1);
-    //     updateNodeClasses(cy);
-    //     cy.layout(layout).run();
-        
-    //     cy.nodes().forEach(node => node.unlock());
-    // })
 }
-window.fetchAndAddNodes = fetchAndAddNodes;
+window.fetchSubTopics = fetchSubTopics;
 
 
 /*
