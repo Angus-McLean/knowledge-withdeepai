@@ -145,14 +145,14 @@ function CytoComponent() {
                 updateNodeOpacity(cyRef.current, 1);
                 updateNodeClasses(cyRef.current);
 
-                if (cyRef.current.nodes().length > 0) {
-                    setTimeout(() => {
-                        console.log('STARTING LAYOUT', layout);
-                        cyRef.current.layout(layout).run()
-                    }, 5000);
-                } else {
+                setTimeout(() => {
+                    console.log('STARTING LAYOUT', layout);
                     cyRef.current.layout(layout).run()
-                }
+                }, 5000);
+                // if (cyRef.current.nodes().length > 0) {
+                // } else {
+                //     cyRef.current.layout(layout).run()
+                // }
             }
         });
     }, []);
