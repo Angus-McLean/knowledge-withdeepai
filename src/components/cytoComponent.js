@@ -55,7 +55,7 @@ function calcOpacity(depth, zoom) {
     const zoomDiff = Math.abs(zoomRoot - depth);
     // console.log(zoomDiff)
     const opacity = Math.min(1 / zoomDiff, 1);
-    return opacity;
+    return opacity === null ? 0 : opacity;
 }
 window.calcOpacity = calcOpacity;
 

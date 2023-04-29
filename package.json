@@ -1,7 +1,6 @@
 {
   "name": "knowledge",
   "version": "0.1.0",
-  "homepage": "https://angus-mclean.github.io/knowledge-withdeepai",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.10.6",
