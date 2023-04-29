@@ -14,7 +14,7 @@ window._ = _;
 
 Cytoscape.use( cola )
 
-var SCALE = 10
+var SCALE = 100
 
 // let dataPath = '/knowledge-tree/topic=electrocardiography.json'
 // const dataPath = '/knowledge-tree/all-knowledge.json'
@@ -26,7 +26,7 @@ const layout = {
     name: 'cola',
     // infinite: true,
     animate: true,
-    randomize: true,
+    randomize: false,
     convergenceThreshold: 0.00001,
     avoidOverlap: false,
     nodeSpacing: SCALE * 100,
@@ -37,7 +37,7 @@ const layout = {
     // idealEdgeLength: 6000,
     // idealEdgeLength: function( edge ){ return 60000 / (2 ** (avgValue('depth', edge)))},
     // idealEdgeLength: function( edge ){ return 60000 / (2 ** (avgValue('depth', edge)))},
-    edgeLength: function( edge ){ return SCALE * 500 / (2 ** (avgValue('depth', edge)))},
+    edgeLength: function( edge ){ return SCALE * 300 / (1.8 ** (avgValue('depth', edge)))},
     centerGraph: true,
     fit: false,
 };
@@ -52,10 +52,10 @@ function avgValue(prop, edge) {
 
 function calcOpacity(depth, zoom) {
     // const zoomRoot = Math.log2(zoom) + 1;
-    const zoomRoot = Math.sqrt(zoom) + 2
-    const zoomDiff = Math.abs(zoomRoot - depth);
+    const zoomRoot = Math.sqrt(zoom) + 1
+    const zoomDiff = Math.abs(zoomRoot - depth) 
     // console.log(zoomDiff)
-    const opacity = Math.min(1 / zoomDiff, 1);
+    const opacity = Math.min(1 / zoomDiff, 1)
     return opacity === null ? 0.61 : opacity;
 }
 window.calcOpacity = calcOpacity;
@@ -71,7 +71,7 @@ const style = [
             'height': ele => SCALE * 150 / (2 ** (ele.data('depth'))),
             'opacity': ele => ele.data('op') || 0.61,
             'text-opacity': ele => ele.data('op') || 0.61,
-            'font-size': ele => SCALE * 50 / (2 ** (ele.data('depth'))),
+            'font-size': ele => SCALE * 40 / (2 ** (ele.data('depth'))),
         },
     },
     {
@@ -81,7 +81,7 @@ const style = [
             'target-arrow-color': '#7FDBFF',
             'target-arrow-shape': 'triangle',
             'opacity': ele => avgValue('op', ele),
-            'width': ele => {return 10 / (2 ** (avgValue('depth', ele)))},
+            'width': ele => {return SCALE * 5 / (2 ** (avgValue('depth', ele)))},
         },
     },
 
