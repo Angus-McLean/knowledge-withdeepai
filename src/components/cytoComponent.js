@@ -145,7 +145,13 @@ function CytoComponent() {
                 updateNodeOpacity(cyRef.current, 1);
                 updateNodeClasses(cyRef.current);
 
-                cyRef.current.layout(layout).run() 
+                if (cyRef.current.nodes().length > 0) {
+                    setTimeout(() => {
+                        cyRef.current.layout(layout).run()
+                    }, 1000);
+                } else {
+                    cyRef.current.layout(layout).run()
+                }
             }
         });
     }, []);
