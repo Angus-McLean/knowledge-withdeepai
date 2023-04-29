@@ -55,8 +55,9 @@ function calcOpacity(depth, zoom) {
     const zoomRoot = Math.sqrt(zoom) + 1
     const zoomDiff = Math.abs(zoomRoot - depth) 
     // console.log(zoomDiff)
-    const opacity = Math.min(1 / zoomDiff, 1)
-    return opacity === null ? 0.61 : opacity;
+    // const opacity = (0.5/zoomDiff + zoom/1.1)/1.2;
+    const opacity = (0.5/zoomDiff + zoomRoot/1.1)/2.2;
+    return opacity === null ? 0.61 : Math.max(Math.min(opacity, 1), 0);
 }
 window.calcOpacity = calcOpacity;
 
@@ -81,7 +82,7 @@ const style = [
             'target-arrow-color': '#7FDBFF',
             'target-arrow-shape': 'triangle',
             'opacity': ele => avgValue('op', ele),
-            'width': ele => {return SCALE * 5 / (2 ** (avgValue('depth', ele)))},
+            'width': ele => {return SCALE * 1 / (2 ** (avgValue('depth', ele)))},
         },
     },
 
@@ -143,6 +144,7 @@ function CytoComponent() {
             setElements(cytoData);
             if (cyRef.current) { 
                 
+                cyRef.current.zoom(0.03)
                 updateNodeOpacity(cyRef.current, 1);
                 updateNodeClasses(cyRef.current);
 
@@ -153,6 +155,7 @@ function CytoComponent() {
                     }, 1000);
                 } else {
                     cyRef.current.layout(layout).run()
+                    // cyRef.current.zoom(40)
                 }
             }
         });
