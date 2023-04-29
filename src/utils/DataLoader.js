@@ -11,6 +11,7 @@ function convertNestedObjectToChildren(datanew) {
     });
     datanew = {
         "topic": datanew['name'],
+        "path": datanew['path'],
         "subtopics": subtopicsArr
     }
     return datanew;
@@ -37,7 +38,7 @@ class DataLoader {
                 // rename 'children' to 'subtopics' deeply iterate with lodash
                 // var data_transformed = replaceKeysDeep(raw, { children: 'subtopics', name: 'topic' });
                 var data_transformed = [convertNestedObjectToChildren(raw)]
-                // this.data = data_transformed;
+                this.data = data_transformed;
                 return data_transformed
             });
         } else {
@@ -74,7 +75,7 @@ class DataLoader {
         const arrEdges = [];
 
         data.forEach((d) => {
-            arrNodes.push({ data: { id: d.topic, label: d.topic, depth: depth } });
+            arrNodes.push({ data: { id: d.topic, label: d.topic, depth: depth, path: d.path} });
             let edges = (d.subtopics||[]).map(a => {
                 return {data:{id:d.topic+'-'+a.topic, source:d.topic, target:a.topic}}
             })

@@ -19,7 +19,8 @@ var SCALE = 10
 // let dataPath = '/knowledge-tree/topic=electrocardiography.json'
 // const dataPath = '/knowledge-tree/all-knowledge.json'
 // const dataPath = '/knowledge-tree/all-knowledge-nest.json'
-const dataPath = '/knowledge_atlas/All Knowledge/data.json'
+const rootPath = '/knowledge_atlas/'
+const dataPath = rootPath + 'All Knowledge/data.json'
 
 const layout = {
     name: 'cola',
@@ -55,7 +56,7 @@ function calcOpacity(depth, zoom) {
     const zoomDiff = Math.abs(zoomRoot - depth);
     // console.log(zoomDiff)
     const opacity = Math.min(1 / zoomDiff, 1);
-    return opacity === null ? 0 : opacity;
+    return opacity === null ? 0.61 : opacity;
 }
 window.calcOpacity = calcOpacity;
 
@@ -68,8 +69,8 @@ const style = [
             'color': '#fff',
             'width': ele => SCALE * 150 / (2 ** (ele.data('depth'))),
             'height': ele => SCALE * 150 / (2 ** (ele.data('depth'))),
-            'opacity': ele => ele.data('op') || 0,
-            'text-opacity': ele => ele.data('op') || 0,
+            'opacity': ele => ele.data('op') || 0.61,
+            'text-opacity': ele => ele.data('op') || 0.61,
             'font-size': ele => SCALE * 50 / (2 ** (ele.data('depth'))),
         },
     },
@@ -145,14 +146,14 @@ function CytoComponent() {
                 updateNodeOpacity(cyRef.current, 1);
                 updateNodeClasses(cyRef.current);
 
-                setTimeout(() => {
-                    console.log('STARTING LAYOUT', layout);
+                if (cyRef.current.nodes().length == 0) {
+                    setTimeout(() => {
+                        console.log('STARTING LAYOUT', layout);
+                        cyRef.current.layout(layout).run()
+                    }, 1000);
+                } else {
                     cyRef.current.layout(layout).run()
-                }, 5000);
-                // if (cyRef.current.nodes().length > 0) {
-                // } else {
-                //     cyRef.current.layout(layout).run()
-                // }
+                }
             }
         });
     }, []);
@@ -190,7 +191,10 @@ function CytoComponent() {
         if (cyRef.current) {
             cyRef.current.on('tap', 'node', (evt) => {
                 const node = evt.target;
-                alert(`Tapped on node with ID: ${node.id()}`);
+                console.log('tapped on node', node);
+                // alert(`Tapped on node with ID: ${node.id()}`);
+                fetchSubTopics(node);
+
             });
         }
     }, []);
@@ -208,16 +212,26 @@ function CytoComponent() {
     );
 }
 
+function fetchSubTopics(node) {
+    // path to url
+    // All Knowledge > Social Sciences > Psychology
+    const topic_path = node.data('path');
+    const url = rootPath + topic_path.split(' > ').join('/') + '/' + node.data('id') + '/data.json';
+    fetchAndAddNodes(window.cyRef.current, url);
+}
+window.fetchSubTopics = fetchSubTopics;
 
 function fetchAndAddNodes(cy, topic_url='/knowledge_atlas/All Knowledge/Social Sciences/Psychology/Industrial-Organizational Psychology/data.json') {
     var Data = window.Data
-    var cy = window.cyRef.current
+    // var cy = window.cyRef.current
     
     Data.getData(topic_url).then(res => {
+        cy.nodes().forEach(node => node.lock());
         cy.add(Data.getCytoData(res, 5));
         updateNodeOpacity(cy, 1);
         updateNodeClasses(cy);
         cy.layout(layout).run();
+        cy.nodes().forEach(node => node.unlock());
         return res
     })
     
