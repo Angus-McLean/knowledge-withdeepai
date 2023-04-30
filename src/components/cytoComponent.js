@@ -38,7 +38,8 @@ const layout = {
     convergenceThreshold: 0.00001,
     avoidOverlap: false,
     nodeSpacing: SCALE * 100,
-    nodeRepulsion: 0.5,
+    // nodeRepulsion: 0.5,
+    nodeRepulsion: function( n ){ return SCALE / 100 / (3.8 ** (n.data('depth')))},
     // nodeRepulsion: function( node ){ return SCALE / (10 * 1.8 ** (node.data('depth')))},
     // edgeElasticity: 1e12,
     maxSimulationTime: maxSimulationTime,
@@ -46,6 +47,7 @@ const layout = {
     // idealEdgeLength: 6000,
     // idealEdgeLength: function( edge ){ return 60000 / (2 ** (avgValue('depth', edge)))},
     // idealEdgeLength: function( edge ){ return 60000 / (2 ** (avgValue('depth', edge)))},
+    idealEdgeLength: function( edge ){ return SCALE * 300 / (1.8 ** (avgValue('depth', edge)))},
     edgeLength: function( edge ){ return SCALE * 300 / (1.8 ** (avgValue('depth', edge)))},
     centerGraph: true,
     fit: false,
@@ -212,9 +214,9 @@ function CytoComponent() {
                     // nodesToFetch = nodesToFetch.filter(node => leaf_topics.includes(node.data('id')));
                     console.log('nodesToFetch', nodesToFetch.map(node => node.data('id')));
                     var fetchProms = nodesToFetch.map(node => {
-                        node.data('fetched', true);
                         return fetchSubTopics(node).then(resp => {
                             if (resp?.length > 1) {console.log('Fetched SubTopics', node, resp)}
+                            node.data('fetched', true);
                             return [node, resp]})
                     })
                     Promise.all(fetchProms).then((resp) => {
