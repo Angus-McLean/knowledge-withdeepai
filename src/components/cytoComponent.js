@@ -47,8 +47,8 @@ const layout = {
     // idealEdgeLength: 6000,
     // idealEdgeLength: function( edge ){ return 60000 / (2 ** (avgValue('depth', edge)))},
     // idealEdgeLength: function( edge ){ return 60000 / (2 ** (avgValue('depth', edge)))},
-    idealEdgeLength: function( edge ){ return SCALE * 300 / (1.8 ** (avgValue('depth', edge)))},
-    edgeLength: function( edge ){ return SCALE * 300 / (1.8 ** (avgValue('depth', edge)))},
+    // idealEdgeLength: function( edge ){ return SCALE * 300 / (1.8 ** (avgValue('depth', edge)))},
+    edgeLength: function( edge ){ return SCALE * 300 / (1.85 ** (avgValue('depth', edge)))},
     centerGraph: true,
     fit: false,
 };
