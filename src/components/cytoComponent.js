@@ -21,6 +21,7 @@ Cytoscape.use( popper );
 
 var SCALE = 100
 var maxSimulationTime = 10000
+window.RUNNING = false
 
 // let dataPath = '/knowledge-tree/topic=electrocardiography.json'
 // const dataPath = '/knowledge-tree/all-knowledge.json'
@@ -40,7 +41,7 @@ const layout = {
     // nodeRepulsion: function( node ){ return SCALE / (10 * 1.8 ** (node.data('depth')))},
     // edgeElasticity: 1e12,
     maxSimulationTime: maxSimulationTime,
-    nestingFactor: 5,
+    nestingFactor: 0.001,
     // idealEdgeLength: 6000,
     // idealEdgeLength: function( edge ){ return 60000 / (2 ** (avgValue('depth', edge)))},
     // idealEdgeLength: function( edge ){ return 60000 / (2 ** (avgValue('depth', edge)))},
@@ -125,7 +126,7 @@ function CytoComponent() {
     const cyRef = useRef(null);
     window.cyRef = cyRef;
     window.cyRef.fetch_and_update = fetch_and_update;
-    console.log('CytoComponent', cyRef);
+    // console.log('CytoComponent', cyRef);
 
     const arrNodes = [
         // { data: { id: 'node1', label: 'Node 1', depth: 1 } },
@@ -198,6 +199,7 @@ function CytoComponent() {
             
             // 
             function conditionallyFetchTopis(event) {
+                if (window.RUNNING) { return; }
                 const cy = event.cy;
                 // debugger;
                 const nodesInView = nodesInViewPort(cy);
@@ -207,10 +209,12 @@ function CytoComponent() {
                     nodesToFetch = nodesToFetch.slice(0, 4)
                     // const leaf_topics = window.Data.getSubTopics(cyRef.data).filter(a => a.subtopics?.length == 0).map(a=> a.topic)
                     // nodesToFetch = nodesToFetch.filter(node => leaf_topics.includes(node.data('id')));
-                    console.log('nodesToFetch', nodesToFetch);
+                    console.log('nodesToFetch', nodesToFetch.map(node => node.data('id')));
                     var fetchProms = nodesToFetch.map(node => {
                         node.data('fetched', true);
-                        return fetchSubTopics(node).then(resp => {return [node, resp]})
+                        return fetchSubTopics(node).then(resp => {
+                            console.log('Fetched SubTopics', node, resp)
+                            return [node, resp]})
                     })
                     Promise.all(fetchProms).then((resp) => {
                         // debugger
@@ -219,6 +223,7 @@ function CytoComponent() {
                         const parentIds = parents.map(p=>p.id())
                         const childrenOnly = children.filter(c => !parentIds.includes(c.data.id))
                         addNodesToParent(cy, parents, childrenOnly);
+                        setTimeout(() => window.RUNNING = false, maxSimulationTime);
                     })
                 }
             }
@@ -379,18 +384,32 @@ function addNodesToParent(cy, parents, children) {
     
     // parents.forEach(n => n.lock());        // relock the parent node
     // var childrenOnly = children.filter(c => parents.map(p=>p.id()).includes(c.id))
-    cy.nodes().forEach(node => node.lock());
-    cy.layout({...layout, ...{name:'preset', fit:false }}).run();
+    if (!window.RUNNING) {
+        cy.nodes().forEach(node => node.lock());
+    }
+    // cy.layout({...layout, ...{name:'preset', fit:false }}).run();
     setTimeout(() => {
         cy.add(children);
         updateNodeOpacity(cy, cy.zoom());
         updateNodeClasses(cy);
-
     }, 0)
-    setTimeout(() => {cy.layout({...layout, ...{idealEdgeLength: 100, maxSimulationTime:maxSimulationTime*2}}).run();}, 0)
+    setTimeout(() => {
+        // setTimeout(() => {cy.layout({...layout, ...{idealEdgeLength: 0.1, maxSimulationTime: 3000, nodeRepulsion:0, nodeSpacing:0}}).run();}, 10)
+        if (!window.RUNNING) {
+            window.RUNNING = true;
+            cy.layout({...layout, ...{maxSimulationTime: maxSimulationTime*2}}).run();
+        }
+        
+        setTimeout(() => {parents.forEach(node => node.unlock())}, maxSimulationTime*1);
+        setTimeout(() => {
+            cy.nodes().forEach(node => node.unlock())
+            window.RUNNING = false;
+        }, maxSimulationTime*1.5);
+        // setTimeout(() => { 
+        //     window.RUNNING = false;
+        // }, maxSimulationTime*2);
+    }, 0)
 
-    setTimeout(() => {parents.forEach(node => node.unlock())}, maxSimulationTime/1.5);
-    setTimeout(() => {cy.nodes().forEach(node => node.unlock())}, maxSimulationTime/0.8);
     // setTimeout(() => {
     //     var childrenIds = children.map(c => c.data.id)
     //     var childrenNodes = cy.nodes().filter(n => childrenIds.includes(n.id))
