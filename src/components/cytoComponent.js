@@ -21,7 +21,8 @@ Cytoscape.use( popper );
 
 var SCALE = 100
 var maxSimulationTime = 10000
-window.RUNNING = false
+window.RUNNING = true
+setTimeout(() => { window.RUNNING = false }, maxSimulationTime/3)
 
 // let dataPath = '/knowledge-tree/topic=electrocardiography.json'
 // const dataPath = '/knowledge-tree/all-knowledge.json'
@@ -205,7 +206,7 @@ function CytoComponent() {
                 const nodesInView = nodesInViewPort(cy);
                 var nodesToFetch = nodesInView.filter(n => !n.data('fetched'));
                 
-                if (nodesToFetch.length > 0 && nodesToFetch.length < 10) {
+                if (nodesInView.length < 20 && nodesToFetch.length > 0 && nodesToFetch.length < 10) {
                     nodesToFetch = nodesToFetch.slice(0, 4)
                     // const leaf_topics = window.Data.getSubTopics(cyRef.data).filter(a => a.subtopics?.length == 0).map(a=> a.topic)
                     // nodesToFetch = nodesToFetch.filter(node => leaf_topics.includes(node.data('id')));
@@ -213,7 +214,7 @@ function CytoComponent() {
                     var fetchProms = nodesToFetch.map(node => {
                         node.data('fetched', true);
                         return fetchSubTopics(node).then(resp => {
-                            console.log('Fetched SubTopics', node, resp)
+                            if (resp?.length > 1) {console.log('Fetched SubTopics', node, resp)}
                             return [node, resp]})
                     })
                     Promise.all(fetchProms).then((resp) => {
