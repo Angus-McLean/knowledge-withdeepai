@@ -8,11 +8,16 @@ import cola from 'cytoscape-cola';
 
 import DataLoader from '../utils/DataLoader';
 import { throttle } from 'lodash';
+import popper from 'cytoscape-popper';
+
+import tippy from 'tippy.js';
+window.tippy = tippy;
 
 const _ = require("lodash");
 window._ = _;
 
 Cytoscape.use( cola )
+Cytoscape.use( popper );
 
 var SCALE = 100
 
@@ -200,6 +205,68 @@ function CytoComponent() {
                 fetchSubTopics(node);
 
             });
+        }
+    }, []);
+
+    // hover handler
+    useEffect(() => {
+        if (cyRef.current) {
+            cyRef.current.on('mouseover', 'node', (evt) => {
+
+                if(document.getElementById('tippyElement')) {
+                    document.getElementById('tippyElement')?.tippy?.destroy();
+                    document.getElementById('tippyElement')?.remove();
+                }
+
+                const node = evt.target;
+                console.log('hover on node', node);
+                // alert(`Tapped on node with ID: ${node.id()}`);
+                let ref = node.popperRef(); // used only for positioning
+
+                // A dummy element must be passed as tippy only accepts dom element(s) as the target
+                // https://atomiks.github.io/tippyjs/v6/constructor/#target-types
+                let dummyDomEle = document.createElement('div');
+                dummyDomEle.id = 'tippyElement';
+                dummyDomEle.style.width = '100px';
+                document.body.appendChild(dummyDomEle);
+
+                let tip = new tippy(dummyDomEle, { // tippy props:
+                    getReferenceClientRect: ref.getBoundingClientRect, // https://atomiks.github.io/tippyjs/v6/all-props/#getreferenceclientrect
+                    trigger: 'manual', // mandatory, we cause the tippy to show programmatically.
+                    placement: 'bottom',
+                    interactive: true,
+                    arrow: true,
+                    animation: 'scale',
+
+                    // your own custom props
+                    // content prop can be used when the target is a single element https://atomiks.github.io/tippyjs/v6/constructor/#prop
+                    content: () => {
+                        let content = document.createElement('div');
+                        content.style.color = 'white';
+                        content.style.background = 'rgb(142 142 142 / 24%)';
+                        content.style.padding = '5px';
+                        content.style.marginTop = '-15px';
+                        content.style.textAlign = 'center';
+                        content.style.borderRadius = '10px';
+
+                        content.innerHTML += `<strong style="text-align:center">${node.id()}<strong><br/>`;
+                        content.innerHTML += `<a target="_blank" href="https://www.google.com/search?q=${node.id()}">Google</a> - `;
+                        content.innerHTML += `<a target="_blank" href="https://en.wikipedia.org/w/index.php?search=${node.id()}">Wikipedia</a> - `;
+                        content.innerHTML += `<a target="_blank" href="https://scholar.google.com/scholar?q=${node.id()}">Scholar</a> - `;
+                        content.innerHTML += `<a target="_blank" href="https://www.youtube.com/results?search_query=${node.id()}">Youtube</a>`;
+
+                        return content;
+                    }
+                });
+
+                tip.show();
+                dummyDomEle.tippy = tip; // for updating the content
+
+            })
+            cyRef.current.on('mouseout', 'node', (evt) => {
+                document.getElementById('tippyElement')?.tippy?.destroy();
+                document.getElementById('tippyElement')?.remove();
+            })
         }
     }, []);
 
