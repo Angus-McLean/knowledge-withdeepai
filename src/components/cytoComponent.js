@@ -38,7 +38,7 @@ const layout = {
     nodeSpacing: SCALE * 100,
     nodeRepulsion: 0.5,
     // nodeRepulsion: function( node ){ return SCALE / (10 * 1.8 ** (node.data('depth')))},
-    edgeElasticity: 1e12,
+    // edgeElasticity: 1e12,
     maxSimulationTime: maxSimulationTime,
     nestingFactor: 5,
     // idealEdgeLength: 6000,
@@ -222,7 +222,7 @@ function CytoComponent() {
                     })
                 }
             }
-            const debouncedConditionallyFetchTopis = throttle(conditionallyFetchTopis, 500, { leading: true, trailing: true });
+            const debouncedConditionallyFetchTopis = throttle(conditionallyFetchTopis, 1000, { leading: true, trailing: true });
             cyRef.current.on('zoom', debouncedConditionallyFetchTopis);
         }
     }, []);
@@ -249,7 +249,7 @@ function CytoComponent() {
         }
 
         // const node = evt.target;
-        console.log('hover on node', node);
+        // console.log('hover on node', node);
         // alert(`Tapped on node with ID: ${node.id()}`);
         let ref = node.popperRef(); // used only for positioning
 
@@ -380,16 +380,17 @@ function addNodesToParent(cy, parents, children) {
     // parents.forEach(n => n.lock());        // relock the parent node
     // var childrenOnly = children.filter(c => parents.map(p=>p.id()).includes(c.id))
     cy.nodes().forEach(node => node.lock());
-    cy.layout({name:'preset', fit:false }).run();
+    cy.layout({...layout, ...{name:'preset', fit:false }}).run();
     setTimeout(() => {
         cy.add(children);
         updateNodeOpacity(cy, cy.zoom());
         updateNodeClasses(cy);
 
-    }, 100)
-    setTimeout(() => {cy.layout(layout).run();}, 200)
+    }, 0)
+    setTimeout(() => {cy.layout({...layout, ...{idealEdgeLength: 100, maxSimulationTime:maxSimulationTime*2}}).run();}, 0)
 
-    
+    setTimeout(() => {parents.forEach(node => node.unlock())}, maxSimulationTime/1.5);
+    setTimeout(() => {cy.nodes().forEach(node => node.unlock())}, maxSimulationTime/0.8);
     // setTimeout(() => {
     //     var childrenIds = children.map(c => c.data.id)
     //     var childrenNodes = cy.nodes().filter(n => childrenIds.includes(n.id))
@@ -404,7 +405,7 @@ function addNodesToParent(cy, parents, children) {
     // }, 1000);
     
     
-    setTimeout(() => {cy.nodes().forEach(node => node.unlock())}, maxSimulationTime/1.2);
+    
 }
 window.addNodesToParent = addNodesToParent
 
