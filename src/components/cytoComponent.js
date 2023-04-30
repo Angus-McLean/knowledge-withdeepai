@@ -146,7 +146,7 @@ function CytoComponent() {
         data.getData(dataPath).then((resp) => {
             console.log(`data.getData(${dataPath})`, resp)
             cyRef.data = resp;
-            const cytoData = data.getCytoData(resp, 2);
+            const cytoData = data.getCytoData(resp, 1);
             
             setElements(cytoData);
             if (cyRef.current) { 
@@ -204,8 +204,9 @@ function CytoComponent() {
                 var nodesToFetch = nodesInView.filter(n => !n.data('fetched'));
                 
                 if (nodesToFetch.length > 0 && nodesToFetch.length < 10) {
-                    const leaf_topics = window.Data.getSubTopics(cyRef.data).filter(a => a.subtopics?.length == 0).map(a=> a.topic)
-                    nodesToFetch = nodesToFetch.filter(node => leaf_topics.includes(node.data('id')));
+                    nodesToFetch = nodesToFetch.slice(0, 4)
+                    // const leaf_topics = window.Data.getSubTopics(cyRef.data).filter(a => a.subtopics?.length == 0).map(a=> a.topic)
+                    // nodesToFetch = nodesToFetch.filter(node => leaf_topics.includes(node.data('id')));
                     console.log('nodesToFetch', nodesToFetch);
                     var fetchProms = nodesToFetch.map(node => {
                         node.data('fetched', true);
@@ -225,6 +226,8 @@ function CytoComponent() {
             cyRef.current.on('zoom', debouncedConditionallyFetchTopis);
         }
     }, []);
+
+
 
     // click handler
     useEffect(() => {
@@ -345,7 +348,7 @@ function fetchSubTopics(node) {
     return fetchSubTopicsData(node).then(res => {
         // cy.nodes().forEach(node => node.lock());
 
-        var newCytoData = Data.getCytoData(res, 5);
+        var newCytoData = Data.getCytoData(res, node.data('depth'));
         
         return newCytoData
     })
@@ -355,7 +358,9 @@ window.fetchSubTopics = fetchSubTopics;
 
 function addNodesToParent(cy, parents, children) {
     if(parents.length == 0 || children.length == 0) { return ; }
-    
+    const bb = parents[0].position();
+    const ext = cy.extent()
+
     children.forEach(n => {
         if(n.target || n.source) { 
             return;
@@ -366,22 +371,25 @@ function addNodesToParent(cy, parents, children) {
         // const x = bb.x + (Math.random()*SCALE);
         // const y = bb.y + (Math.random()*SCALE);
         // NOTE : this is a hack to get the nodes to render in the right place - using cola layout..
-        // n['position'] = { x:bb.x * 2, y:bb.y * 2 };
+        n['position'] = { x:bb.x, y:bb.y };
         // n['position'] = { x:(ext.x2 - ext.x1)/2 + ext.x1-10000, y:(ext.y2 - ext.y1)/2 + ext.y1-10000 };
-        // n['renderedPosition'] = { x:200, y:200 };
+        // n['renderedPosition'] = { x:0, y:0 };
     })
     
     
     // parents.forEach(n => n.lock());        // relock the parent node
     // var childrenOnly = children.filter(c => parents.map(p=>p.id()).includes(c.id))
     cy.nodes().forEach(node => node.lock());
-    cy.add(children);
-    updateNodeOpacity(cy, cy.zoom());
-    updateNodeClasses(cy);
-    
+    cy.layout({name:'preset', fit:false }).run();
+    setTimeout(() => {
+        cy.add(children);
+        updateNodeOpacity(cy, cy.zoom());
+        updateNodeClasses(cy);
 
-    const bb = parents[0].position();
-    const ext = cy.extent()
+    }, 100)
+    setTimeout(() => {cy.layout(layout).run();}, 200)
+
+    
     // setTimeout(() => {
     //     var childrenIds = children.map(c => c.data.id)
     //     var childrenNodes = cy.nodes().filter(n => childrenIds.includes(n.id))
@@ -395,7 +403,7 @@ function addNodesToParent(cy, parents, children) {
     //     // }));
     // }, 1000);
     
-    cy.layout(layout).run();
+    
     setTimeout(() => {cy.nodes().forEach(node => node.unlock())}, maxSimulationTime/1.2);
 }
 window.addNodesToParent = addNodesToParent
