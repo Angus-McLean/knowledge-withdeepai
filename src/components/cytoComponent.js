@@ -20,6 +20,7 @@ Cytoscape.use( cola )
 Cytoscape.use( popper );
 
 var SCALE = 100
+var maxSimulationTime = 10000
 
 // let dataPath = '/knowledge-tree/topic=electrocardiography.json'
 // const dataPath = '/knowledge-tree/all-knowledge.json'
@@ -35,9 +36,10 @@ const layout = {
     convergenceThreshold: 0.00001,
     avoidOverlap: false,
     nodeSpacing: SCALE * 100,
-    nodeRepulsion: 1,
-    edgeElasticity: 1e9,
-    maxSimulationTime: 10000,
+    nodeRepulsion: 0.5,
+    // nodeRepulsion: function( node ){ return SCALE / (10 * 1.8 ** (node.data('depth')))},
+    edgeElasticity: 1e12,
+    maxSimulationTime: maxSimulationTime,
     nestingFactor: 5,
     // idealEdgeLength: 6000,
     // idealEdgeLength: function( edge ){ return 60000 / (2 ** (avgValue('depth', edge)))},
@@ -151,7 +153,7 @@ function CytoComponent() {
                 
                 cyRef.current.zoom(0.03)
                 cyRef.current.center()
-                updateNodeOpacity(cyRef.current, 1);
+                updateNodeOpacity(cyRef.current, 0.03);
                 updateNodeClasses(cyRef.current);
 
                 if (cyRef.current.nodes().length == 0) {
@@ -189,9 +191,38 @@ function CytoComponent() {
     useEffect(() => {
         if (cyRef.current) {
             console.log('useEffect', arguments);
-            // const debouncedZoomHandler = debounce(zoomHandler, 100, { leading: true, trailing: true });
+            
+            // 
             const debouncedZoomHandler = throttle(zoomHandler, 100, { leading: true, trailing: true });
             cyRef.current.on('zoom', debouncedZoomHandler);
+            
+            // 
+            function conditionallyFetchTopis(event) {
+                const cy = event.cy;
+                // debugger;
+                const nodesInView = nodesInViewPort(cy);
+                var nodesToFetch = nodesInView.filter(n => !n.data('fetched'));
+                
+                if (nodesToFetch.length > 0 && nodesToFetch.length < 10) {
+                    const leaf_topics = window.Data.getSubTopics(cyRef.data).filter(a => a.subtopics?.length == 0).map(a=> a.topic)
+                    nodesToFetch = nodesToFetch.filter(node => leaf_topics.includes(node.data('id')));
+                    console.log('nodesToFetch', nodesToFetch);
+                    var fetchProms = nodesToFetch.map(node => {
+                        node.data('fetched', true);
+                        return fetchSubTopics(node).then(resp => {return [node, resp]})
+                    })
+                    Promise.all(fetchProms).then((resp) => {
+                        // debugger
+                        const parents = resp.map(a => a[0])
+                        const children = resp.flatMap(a => a[1])
+                        const parentIds = parents.map(p=>p.id())
+                        const childrenOnly = children.filter(c => !parentIds.includes(c.data.id))
+                        addNodesToParent(cy, parents, childrenOnly);
+                    })
+                }
+            }
+            const debouncedConditionallyFetchTopis = throttle(conditionallyFetchTopis, 500, { leading: true, trailing: true });
+            cyRef.current.on('zoom', debouncedConditionallyFetchTopis);
         }
     }, []);
 
@@ -202,66 +233,70 @@ function CytoComponent() {
                 const node = evt.target;
                 console.log('tapped on node', node);
                 // alert(`Tapped on node with ID: ${node.id()}`);
-                fetchSubTopics(node);
-
+                // fetchSubTopics(node);
+                createHoverForNode(node);
             });
         }
     }, []);
+
+    function createHoverForNode(node) {
+        if(document.getElementById('tippyElement')) {
+            document.getElementById('tippyElement')?.tippy?.destroy();
+            document.getElementById('tippyElement')?.remove();
+        }
+
+        // const node = evt.target;
+        console.log('hover on node', node);
+        // alert(`Tapped on node with ID: ${node.id()}`);
+        let ref = node.popperRef(); // used only for positioning
+
+        // A dummy element must be passed as tippy only accepts dom element(s) as the target
+        // https://atomiks.github.io/tippyjs/v6/constructor/#target-types
+        let dummyDomEle = document.createElement('div');
+        dummyDomEle.id = 'tippyElement';
+        dummyDomEle.style.width = '100px';
+        document.body.appendChild(dummyDomEle);
+
+        let tip = new tippy(dummyDomEle, { // tippy props:
+            getReferenceClientRect: ref.getBoundingClientRect, // https://atomiks.github.io/tippyjs/v6/all-props/#getreferenceclientrect
+            trigger: 'manual', // mandatory, we cause the tippy to show programmatically.
+            placement: 'bottom',
+            interactive: true,
+            arrow: true,
+            animation: 'scale',
+
+            // your own custom props
+            // content prop can be used when the target is a single element https://atomiks.github.io/tippyjs/v6/constructor/#prop
+            content: () => {
+                let content = document.createElement('div');
+                content.style.color = 'white';
+                content.style.background = 'rgb(142 142 142 / 24%)';
+                content.style.padding = '5px';
+                content.style.marginTop = '-15px';
+                content.style.textAlign = 'center';
+                content.style.borderRadius = '10px';
+
+                content.innerHTML += `<strong style="text-align:center">${node.id()}<strong><br/>`;
+                content.innerHTML += `<a target="_blank" href="https://www.google.com/search?q=${node.id()}">Google</a> - `;
+                content.innerHTML += `<a target="_blank" href="https://en.wikipedia.org/w/index.php?search=${node.id()}">Wikipedia</a> - `;
+                content.innerHTML += `<a target="_blank" href="https://scholar.google.com/scholar?q=${node.id()}">Scholar</a> - `;
+                content.innerHTML += `<a target="_blank" href="https://www.youtube.com/results?search_query=${node.id()}">Youtube</a>`;
+
+                return content;
+            }
+        });
+
+        tip.show();
+        dummyDomEle.tippy = tip; // for updating the content
+
+    }
+
 
     // hover handler
     useEffect(() => {
         if (cyRef.current) {
             cyRef.current.on('mouseover', 'node', (evt) => {
-
-                if(document.getElementById('tippyElement')) {
-                    document.getElementById('tippyElement')?.tippy?.destroy();
-                    document.getElementById('tippyElement')?.remove();
-                }
-
-                const node = evt.target;
-                console.log('hover on node', node);
-                // alert(`Tapped on node with ID: ${node.id()}`);
-                let ref = node.popperRef(); // used only for positioning
-
-                // A dummy element must be passed as tippy only accepts dom element(s) as the target
-                // https://atomiks.github.io/tippyjs/v6/constructor/#target-types
-                let dummyDomEle = document.createElement('div');
-                dummyDomEle.id = 'tippyElement';
-                dummyDomEle.style.width = '100px';
-                document.body.appendChild(dummyDomEle);
-
-                let tip = new tippy(dummyDomEle, { // tippy props:
-                    getReferenceClientRect: ref.getBoundingClientRect, // https://atomiks.github.io/tippyjs/v6/all-props/#getreferenceclientrect
-                    trigger: 'manual', // mandatory, we cause the tippy to show programmatically.
-                    placement: 'bottom',
-                    interactive: true,
-                    arrow: true,
-                    animation: 'scale',
-
-                    // your own custom props
-                    // content prop can be used when the target is a single element https://atomiks.github.io/tippyjs/v6/constructor/#prop
-                    content: () => {
-                        let content = document.createElement('div');
-                        content.style.color = 'white';
-                        content.style.background = 'rgb(142 142 142 / 24%)';
-                        content.style.padding = '5px';
-                        content.style.marginTop = '-15px';
-                        content.style.textAlign = 'center';
-                        content.style.borderRadius = '10px';
-
-                        content.innerHTML += `<strong style="text-align:center">${node.id()}<strong><br/>`;
-                        content.innerHTML += `<a target="_blank" href="https://www.google.com/search?q=${node.id()}">Google</a> - `;
-                        content.innerHTML += `<a target="_blank" href="https://en.wikipedia.org/w/index.php?search=${node.id()}">Wikipedia</a> - `;
-                        content.innerHTML += `<a target="_blank" href="https://scholar.google.com/scholar?q=${node.id()}">Scholar</a> - `;
-                        content.innerHTML += `<a target="_blank" href="https://www.youtube.com/results?search_query=${node.id()}">Youtube</a>`;
-
-                        return content;
-                    }
-                });
-
-                tip.show();
-                dummyDomEle.tippy = tip; // for updating the content
-
+                createHoverForNode(evt.target);
             })
             cyRef.current.on('mouseout', 'node', (evt) => {
                 document.getElementById('tippyElement')?.tippy?.destroy();
@@ -283,6 +318,21 @@ function CytoComponent() {
     );
 }
 
+function fetchSubTopicsData(node) {
+    var Data = window.Data
+    var cy = window.cyRef.current
+    // path to url
+    // All Knowledge > Social Sciences > Psychology
+    const topic_path = node.data('path');
+    const url = rootPath + topic_path.split(' > ').join('/') + '/' + node.data('id') + '/data.json';
+    // fetchAndAddNodes(window.cyRef.current, url);
+
+    return Data.getData(url).then(res => {
+        return res
+    })
+}
+window.fetchSubTopics = fetchSubTopics;
+
 function fetchSubTopics(node) {
     var Data = window.Data
     var cy = window.cyRef.current
@@ -292,33 +342,63 @@ function fetchSubTopics(node) {
     const url = rootPath + topic_path.split(' > ').join('/') + '/' + node.data('id') + '/data.json';
     // fetchAndAddNodes(window.cyRef.current, url);
 
-    Data.getData(url).then(res => {
-        cy.nodes().forEach(node => node.lock());
-
+    return fetchSubTopicsData(node).then(res => {
+        // cy.nodes().forEach(node => node.lock());
 
         var newCytoData = Data.getCytoData(res, 5);
         
-        const bb = node.position();
-        newCytoData.forEach(n => {
-            if(n.target || n.source) { 
-                return;
-            }
-            // n['data']['parent'] = node.data('id');
-            // set x and y
-            
-            // const x = bb.x + (Math.random()*SCALE);
-            // const y = bb.y + (Math.random()*SCALE);
-            n['position'] = { x:bb.x, y:bb.y };
-        })
-        cy.add(newCytoData);
-        updateNodeOpacity(cy, 1);
-        updateNodeClasses(cy);
-        cy.layout(layout).run();
-        cy.nodes().forEach(node => node.unlock());
-        return res
+        return newCytoData
     })
 }
 window.fetchSubTopics = fetchSubTopics;
+
+
+function addNodesToParent(cy, parents, children) {
+    if(parents.length == 0 || children.length == 0) { return ; }
+    
+    children.forEach(n => {
+        if(n.target || n.source) { 
+            return;
+        }
+        // n['data']['parent'] = node.data('id');
+        // set x and y
+        
+        // const x = bb.x + (Math.random()*SCALE);
+        // const y = bb.y + (Math.random()*SCALE);
+        // NOTE : this is a hack to get the nodes to render in the right place - using cola layout..
+        // n['position'] = { x:bb.x * 2, y:bb.y * 2 };
+        // n['position'] = { x:(ext.x2 - ext.x1)/2 + ext.x1-10000, y:(ext.y2 - ext.y1)/2 + ext.y1-10000 };
+        // n['renderedPosition'] = { x:200, y:200 };
+    })
+    
+    
+    // parents.forEach(n => n.lock());        // relock the parent node
+    // var childrenOnly = children.filter(c => parents.map(p=>p.id()).includes(c.id))
+    cy.nodes().forEach(node => node.lock());
+    cy.add(children);
+    updateNodeOpacity(cy, cy.zoom());
+    updateNodeClasses(cy);
+    
+
+    const bb = parents[0].position();
+    const ext = cy.extent()
+    // setTimeout(() => {
+    //     var childrenIds = children.map(c => c.data.id)
+    //     var childrenNodes = cy.nodes().filter(n => childrenIds.includes(n.id))
+    //     // childrenNodes.forEach(n => n.position({ 
+    //     //     x:(ext.x2 - ext.x1)/2 + ext.x1,
+    //     //     y:(ext.y2 - ext.y1)/2 + ext.y1
+    //     // }));
+    //     // childrenNodes.forEach(n => n.position({ 
+    //     //     x:bb.x,
+    //     //     y:bb.y,
+    //     // }));
+    // }, 1000);
+    
+    cy.layout(layout).run();
+    setTimeout(() => {cy.nodes().forEach(node => node.unlock())}, maxSimulationTime/1.2);
+}
+window.addNodesToParent = addNodesToParent
 
 
 /*
@@ -388,7 +468,7 @@ function fetch_and_update_new() {
         console.log('cytoData', cytoData);
         window.cyRef.current.elements().remove();
         window.cyRef.current.add(cytoData);
-        updateNodeOpacity(window.cyRef.current, 1);
+        updateNodeOpacity(window.cyRef.current, window.cyRef.zoom());
         updateNodeClasses(window.cyRef.current);
         window.cyRef.current.layout(layout).run();
     })
@@ -423,7 +503,7 @@ function fetch_and_update() {
         const cytoData = Data.getCytoData(cyRef.data, 2);
         cyRef.current.elements().remove();
         cyRef.current.add(cytoData);
-        updateNodeOpacity(cyRef.current, 1);
+        updateNodeOpacity(cyRef.current, cyRef.zoom());
         updateNodeClasses(cyRef.current);
         cyRef.current.layout(layout).run();
     });
