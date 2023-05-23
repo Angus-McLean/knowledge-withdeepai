@@ -1,1 +1,164 @@
-{"Psychology": {"Cognitive Psychology": {"name": "Cognitive Psychology", "path": "All Knowledge > Social Sciences > Psychology"}, "Developmental Psychology": {"name": "Developmental Psychology", "path": "All Knowledge > Social Sciences > Psychology"}, "Social Psychology": {"name": "Social Psychology", "path": "All Knowledge > Social Sciences > Psychology"}, "Clinical Psychology": {"name": "Clinical Psychology", "path": "All Knowledge > Social Sciences > Psychology"}, "Neuropsychology": {"name": "Neuropsychology", "path": "All Knowledge > Social Sciences > Psychology"}, "Educational Psychology": {"name": "Educational Psychology", "path": "All Knowledge > Social Sciences > Psychology"}, "Industrial-Organizational Psychology": {"name": "Industrial-Organizational Psychology", "path": "All Knowledge > Social Sciences > Psychology"}, "name": "Psychology", "path": "All Knowledge > Social Sciences"}, "Sociology": {"Social Theory": {"name": "Social Theory", "path": "All Knowledge > Social Sciences > Sociology"}, "Social Research": {"name": "Social Research", "path": "All Knowledge > Social Sciences > Sociology"}, "Social Inequality": {"name": "Social Inequality", "path": "All Knowledge > Social Sciences > Sociology"}, "Cultural Sociology": {"name": "Cultural Sociology", "path": "All Knowledge > Social Sciences > Sociology"}, "Political Sociology": {"name": "Political Sociology", "path": "All Knowledge > Social Sciences > Sociology"}, "Economic Sociology": {"name": "Economic Sociology", "path": "All Knowledge > Social Sciences > Sociology"}, "name": "Sociology", "path": "All Knowledge > Social Sciences"}, "Anthropology": {"Cultural Anthropology": {"name": "Cultural Anthropology", "path": "All Knowledge > Social Sciences > Anthropology"}, "Linguistic Anthropology": {"name": "Linguistic Anthropology", "path": "All Knowledge > Social Sciences > Anthropology"}, "Biological Anthropology": {"name": "Biological Anthropology", "path": "All Knowledge > Social Sciences > Anthropology"}, "Archaeology": {"name": "Archaeology", "path": "All Knowledge > Social Sciences > Anthropology"}, "name": "Anthropology", "path": "All Knowledge > Social Sciences"}, "Political Science": {"Comparative Politics": {"name": "Comparative Politics", "path": "All Knowledge > Social Sciences > Political Science"}, "International Relations": {"name": "International Relations", "path": "All Knowledge > Social Sciences > Political Science"}, "Political Theory": {"name": "Political Theory", "path": "All Knowledge > Social Sciences > Political Science"}, "Public Administration": {"name": "Public Administration", "path": "All Knowledge > Social Sciences > Political Science"}, "Public Policy": {"name": "Public Policy", "path": "All Knowledge > Social Sciences > Political Science"}, "name": "Political Science", "path": "All Knowledge > Social Sciences"}, "Economics": {"Microeconomics": {"name": "Microeconomics", "path": "All Knowledge > Social Sciences > Economics"}, "Macroeconomics": {"name": "Macroeconomics", "path": "All Knowledge > Social Sciences > Economics"}, "International Economics": {"name": "International Economics", "path": "All Knowledge > Social Sciences > Economics"}, "Labor Economics": {"name": "Labor Economics", "path": "All Knowledge > Social Sciences > Economics"}, "Public Finance": {"name": "Public Finance", "path": "All Knowledge > Social Sciences > Economics"}, "Econometrics": {"name": "Econometrics", "path": "All Knowledge > Social Sciences > Economics"}, "name": "Economics", "path": "All Knowledge > Social Sciences"}, "Geography": {"Physical Geography": {"name": "Physical Geography", "path": "All Knowledge > Social Sciences > Geography"}, "Human Geography": {"name": "Human Geography", "path": "All Knowledge > Social Sciences > Geography"}, "Geographic Information Systems": {"name": "Geographic Information Systems", "path": "All Knowledge > Social Sciences > Geography"}, "Remote Sensing": {"name": "Remote Sensing", "path": "All Knowledge > Social Sciences > Geography"}, "Cartography": {"name": "Cartography", "path": "All Knowledge > Social Sciences > Geography"}, "name": "Geography", "path": "All Knowledge > Social Sciences"}, "name": "Social Sciences", "path": "All Knowledge"}
+{
+    "Psychology": {
+        "Cognitive Psychology": {
+            "name": "Cognitive Psychology",
+            "path": "All Knowledge > Social Sciences > Psychology"
+        },
+        "Developmental Psychology": {
+            "name": "Developmental Psychology",
+            "path": "All Knowledge > Social Sciences > Psychology"
+        },
+        "Social Psychology": {
+            "name": "Social Psychology",
+            "path": "All Knowledge > Social Sciences > Psychology"
+        },
+        "Clinical Psychology": {
+            "name": "Clinical Psychology",
+            "path": "All Knowledge > Social Sciences > Psychology"
+        },
+        "Neuropsychology": {
+            "name": "Neuropsychology",
+            "path": "All Knowledge > Social Sciences > Psychology"
+        },
+        "Educational Psychology": {
+            "name": "Educational Psychology",
+            "path": "All Knowledge > Social Sciences > Psychology"
+        },
+        "Industrial-Organizational Psychology": {
+            "name": "Industrial-Organizational Psychology",
+            "path": "All Knowledge > Social Sciences > Psychology"
+        },
+        "name": "Psychology",
+        "path": "All Knowledge > Social Sciences"
+    },
+    "Sociology": {
+        "Social Theory": {
+            "name": "Social Theory",
+            "path": "All Knowledge > Social Sciences > Sociology"
+        },
+        "Social Research": {
+            "name": "Social Research",
+            "path": "All Knowledge > Social Sciences > Sociology"
+        },
+        "Social Inequality": {
+            "name": "Social Inequality",
+            "path": "All Knowledge > Social Sciences > Sociology"
+        },
+        "Cultural Sociology": {
+            "name": "Cultural Sociology",
+            "path": "All Knowledge > Social Sciences > Sociology"
+        },
+        "Political Sociology": {
+            "name": "Political Sociology",
+            "path": "All Knowledge > Social Sciences > Sociology"
+        },
+        "Economic Sociology": {
+            "name": "Economic Sociology",
+            "path": "All Knowledge > Social Sciences > Sociology"
+        },
+        "name": "Sociology",
+        "path": "All Knowledge > Social Sciences"
+    },
+    "Anthropology": {
+        "Cultural Anthropology": {
+            "name": "Cultural Anthropology",
+            "path": "All Knowledge > Social Sciences > Anthropology"
+        },
+        "Linguistic Anthropology": {
+            "name": "Linguistic Anthropology",
+            "path": "All Knowledge > Social Sciences > Anthropology"
+        },
+        "Biological Anthropology": {
+            "name": "Biological Anthropology",
+            "path": "All Knowledge > Social Sciences > Anthropology"
+        },
+        "Archaeology": {
+            "name": "Archaeology",
+            "path": "All Knowledge > Social Sciences > Anthropology"
+        },
+        "name": "Anthropology",
+        "path": "All Knowledge > Social Sciences"
+    },
+    "Political Science": {
+        "Comparative Politics": {
+            "name": "Comparative Politics",
+            "path": "All Knowledge > Social Sciences > Political Science"
+        },
+        "International Relations": {
+            "name": "International Relations",
+            "path": "All Knowledge > Social Sciences > Political Science"
+        },
+        "Political Theory": {
+            "name": "Political Theory",
+            "path": "All Knowledge > Social Sciences > Political Science"
+        },
+        "Public Administration": {
+            "name": "Public Administration",
+            "path": "All Knowledge > Social Sciences > Political Science"
+        },
+        "Public Policy": {
+            "name": "Public Policy",
+            "path": "All Knowledge > Social Sciences > Political Science"
+        },
+        "name": "Political Science",
+        "path": "All Knowledge > Social Sciences"
+    },
+    "Economics": {
+        "Microeconomics": {
+            "name": "Microeconomics",
+            "path": "All Knowledge > Social Sciences > Economics"
+        },
+        "Macroeconomics": {
+            "name": "Macroeconomics",
+            "path": "All Knowledge > Social Sciences > Economics"
+        },
+        "International Economics": {
+            "name": "International Economics",
+            "path": "All Knowledge > Social Sciences > Economics"
+        },
+        "Labor Economics": {
+            "name": "Labor Economics",
+            "path": "All Knowledge > Social Sciences > Economics"
+        },
+        "Public Finance": {
+            "name": "Public Finance",
+            "path": "All Knowledge > Social Sciences > Economics"
+        },
+        "Econometrics": {
+            "name": "Econometrics",
+            "path": "All Knowledge > Social Sciences > Economics"
+        },
+        "name": "Economics",
+        "path": "All Knowledge > Social Sciences"
+    },
+    "Geography": {
+        "Physical Geography": {
+            "name": "Physical Geography",
+            "path": "All Knowledge > Social Sciences > Geography"
+        },
+        "Human Geography": {
+            "name": "Human Geography",
+            "path": "All Knowledge > Social Sciences > Geography"
+        },
+        "Geographic Information Systems": {
+            "name": "Geographic Information Systems",
+            "path": "All Knowledge > Social Sciences > Geography"
+        },
+        "Remote Sensing": {
+            "name": "Remote Sensing",
+            "path": "All Knowledge > Social Sciences > Geography"
+        },
+        "Cartography": {
+            "name": "Cartography",
+            "path": "All Knowledge > Social Sciences > Geography"
+        },
+        "name": "Geography",
+        "path": "All Knowledge > Social Sciences"
+    },
+    "Tourism": {
+        "name": "Tourism",
+        "path": "All Knowledge > Social Sciences"
+    },
+    "name": "Social Sciences",
+    "path": "All Knowledge"
+}
