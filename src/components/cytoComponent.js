@@ -5,6 +5,7 @@ import dagre from 'cytoscape-dagre';
 import Cytoscape from 'cytoscape';
 import debounce from 'lodash.debounce';
 import cola from 'cytoscape-cola';
+import fcose from 'cytoscape-fcose';
 
 import DataLoader from '../utils/DataLoader';
 import { throttle } from 'lodash';
@@ -16,7 +17,6 @@ window.tippy = tippy;
 const _ = require("lodash");
 window._ = _;
 
-Cytoscape.use( cola )
 Cytoscape.use( popper );
 
 var SCALE = 100
@@ -31,6 +31,42 @@ setTimeout(() => { window.RUNNING = false }, maxSimulationTime/3)
 const rootPath = '/knowledge_atlas/'
 const dataPath = rootPath + 'All Knowledge/data.json'
 
+
+// // BREADTH FIRST LAYOUT
+// const layout = {
+//     name: 'breadthfirst',
+//     directed: true,
+//     grid: false,
+//     circle: true
+// }
+
+
+// COSE LAYOUT
+// Cytoscape.use( fcose )
+// const layout = {
+//     name: 'fcose',
+    
+//     randomize: true,
+//     samplingType: true,
+//     sampleSize: 250,
+//     numIter: 250000,
+//     animationDuration: 2000,
+    
+//     // idealEdgeLength: edge => 5000,
+//     // idealEdgeLength: function( edge ){ return 600 / (2 ** (avgValue('depth', edge)))},
+//     edgeElasticity: edge => 0.450,
+//     // nodeRepulsion: node => 45000,
+//     // nodeSeparation: SCALE * 750,
+    
+//     nestingFactor: 0.0001,
+//     centerGraph: true,
+//     fit: false,
+// };
+
+
+
+// COLA LAYOUT
+Cytoscape.use( cola )
 const layout = {
     name: 'cola',
     // name: 'cose',
@@ -54,6 +90,8 @@ const layout = {
     centerGraph: true,
     fit: false,
 };
+
+
 window.layout = layout;
 
 function avgValue(prop, edge) {
@@ -163,10 +201,10 @@ function CytoComponent() {
                 updateNodeClasses(cyRef.current);
 
                 if (cyRef.current.nodes().length == 0) {
-                    setTimeout(() => {
-                        console.log('STARTING LAYOUT', layout);
-                        cyRef.current.layout(layout).run()
-                    }, 1000);
+                    // setTimeout(() => {
+                    //     console.log('STARTING LAYOUT', layout);
+                    //     cyRef.current.layout(layout).run()
+                    // }, 10000);
                 } else {
                     cyRef.current.layout(layout).run()
                     // cyRef.current.zoom(40)

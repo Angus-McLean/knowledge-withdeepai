@@ -3,24 +3,34 @@
 Interactively navigate the world of human knowledge
 
 # Todos
-- Better knowledge-tree structure
-    - files with folders
-    - subtopics is obj not array
-- Better query
-    - Drop descriptions?
-    - multi-depth queries (names only)
-- Auto query new topics
-    - find leaf nodes, query, add infos
+- Dynamically add nodes
+    - 
+
+- 
+# DONE
 - Dynamically add nodes
     - Better functions
     - handle freeze & add
-- 
-# DONE
+- Auto query new topics
+    - find leaf nodes, query, add infos
+- Better query
+    - Drop descriptions?
+    - multi-depth queries (names only)
+- Better knowledge-tree structure
+    - files with folders
+    - subtopics is obj not array
 - Create a sample JSON document
     - Feed into Cyto
 - Smoothly adjust opacity
 - Create notebook
     - Collect tree structure
+
+
+
+
+
+
+
 
 ----
 # Getting Started with Create React App
