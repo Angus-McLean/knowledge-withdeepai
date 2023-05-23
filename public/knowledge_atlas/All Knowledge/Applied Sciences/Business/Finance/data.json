@@ -1,1 +1,124 @@
-{"name": "Finance", "path": "All Knowledge > Applied Sciences > Business"}
+{
+    "Financial Markets": {
+        "Stocks": {
+            "name": "Stocks",
+            "path": "All Knowledge > Applied Sciences > Business > Finance > Financial Markets"
+        },
+        "Bonds": {
+            "name": "Bonds",
+            "path": "All Knowledge > Applied Sciences > Business > Finance > Financial Markets"
+        },
+        "Commodities": {
+            "name": "Commodities",
+            "path": "All Knowledge > Applied Sciences > Business > Finance > Financial Markets"
+        },
+        "Derivatives": {
+            "name": "Derivatives",
+            "path": "All Knowledge > Applied Sciences > Business > Finance > Financial Markets"
+        },
+        "Foreign Exchange": {
+            "name": "Foreign Exchange",
+            "path": "All Knowledge > Applied Sciences > Business > Finance > Financial Markets"
+        },
+        "name": "Financial Markets",
+        "path": "All Knowledge > Applied Sciences > Business > Finance"
+    },
+    "Corporate Finance": {
+        "Capital Budgeting": {
+            "name": "Capital Budgeting",
+            "path": "All Knowledge > Applied Sciences > Business > Finance > Corporate Finance"
+        },
+        "Financial Planning and Analysis": {
+            "name": "Financial Planning and Analysis",
+            "path": "All Knowledge > Applied Sciences > Business > Finance > Corporate Finance"
+        },
+        "Mergers and Acquisitions": {
+            "name": "Mergers and Acquisitions",
+            "path": "All Knowledge > Applied Sciences > Business > Finance > Corporate Finance"
+        },
+        "Risk Management": {
+            "name": "Risk Management",
+            "path": "All Knowledge > Applied Sciences > Business > Finance > Corporate Finance"
+        },
+        "Valuation": {
+            "name": "Valuation",
+            "path": "All Knowledge > Applied Sciences > Business > Finance > Corporate Finance"
+        },
+        "name": "Corporate Finance",
+        "path": "All Knowledge > Applied Sciences > Business > Finance"
+    },
+    "Investment Management": {
+        "Asset Allocation": {
+            "name": "Asset Allocation",
+            "path": "All Knowledge > Applied Sciences > Business > Finance > Investment Management"
+        },
+        "Hedge Funds": {
+            "name": "Hedge Funds",
+            "path": "All Knowledge > Applied Sciences > Business > Finance > Investment Management"
+        },
+        "Mutual Funds": {
+            "name": "Mutual Funds",
+            "path": "All Knowledge > Applied Sciences > Business > Finance > Investment Management"
+        },
+        "Private Equity": {
+            "name": "Private Equity",
+            "path": "All Knowledge > Applied Sciences > Business > Finance > Investment Management"
+        },
+        "Real Estate Investment Trusts _REITs_": {
+            "name": "Real Estate Investment Trusts _REITs_",
+            "path": "All Knowledge > Applied Sciences > Business > Finance > Investment Management"
+        },
+        "name": "Investment Management",
+        "path": "All Knowledge > Applied Sciences > Business > Finance"
+    },
+    "Financial Institutions": {
+        "Banks": {
+            "name": "Banks",
+            "path": "All Knowledge > Applied Sciences > Business > Finance > Financial Institutions"
+        },
+        "Insurance Companies": {
+            "name": "Insurance Companies",
+            "path": "All Knowledge > Applied Sciences > Business > Finance > Financial Institutions"
+        },
+        "Investment Banks": {
+            "name": "Investment Banks",
+            "path": "All Knowledge > Applied Sciences > Business > Finance > Financial Institutions"
+        },
+        "Pension Funds": {
+            "name": "Pension Funds",
+            "path": "All Knowledge > Applied Sciences > Business > Finance > Financial Institutions"
+        },
+        "Sovereign Wealth Funds": {
+            "name": "Sovereign Wealth Funds",
+            "path": "All Knowledge > Applied Sciences > Business > Finance > Financial Institutions"
+        },
+        "name": "Financial Institutions",
+        "path": "All Knowledge > Applied Sciences > Business > Finance"
+    },
+    "Financial Regulation": {
+        "Accounting Standards": {
+            "name": "Accounting Standards",
+            "path": "All Knowledge > Applied Sciences > Business > Finance > Financial Regulation"
+        },
+        "Basel Accords": {
+            "name": "Basel Accords",
+            "path": "All Knowledge > Applied Sciences > Business > Finance > Financial Regulation"
+        },
+        "Dodd_Frank Act": {
+            "name": "Dodd_Frank Act",
+            "path": "All Knowledge > Applied Sciences > Business > Finance > Financial Regulation"
+        },
+        "Sarbanes_Oxley Act": {
+            "name": "Sarbanes_Oxley Act",
+            "path": "All Knowledge > Applied Sciences > Business > Finance > Financial Regulation"
+        },
+        "Securities and Exchange Commission _SEC_ Regulations": {
+            "name": "Securities and Exchange Commission _SEC_ Regulations",
+            "path": "All Knowledge > Applied Sciences > Business > Finance > Financial Regulation"
+        },
+        "name": "Financial Regulation",
+        "path": "All Knowledge > Applied Sciences > Business > Finance"
+    },
+    "name": "Finance",
+    "path": "All Knowledge > Applied Sciences > Business"
+}
