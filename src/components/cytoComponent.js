@@ -21,6 +21,7 @@ Cytoscape.use( popper );
 
 var SCALE = 100
 var maxSimulationTime = 10000
+var DEFAULT_OPACITY = 0.61
 window.RUNNING = true
 setTimeout(() => { window.RUNNING = false }, maxSimulationTime/3)
 
@@ -32,7 +33,7 @@ const dataPath = rootPath + 'All Knowledge/data.json'
 
 const layout = {
     name: 'cola',
-    // infinite: true,
+    // name: 'cose',
     animate: true,
     randomize: false,
     convergenceThreshold: 0.00001,
@@ -43,6 +44,7 @@ const layout = {
     // nodeRepulsion: function( node ){ return SCALE / (10 * 1.8 ** (node.data('depth')))},
     // edgeElasticity: 1e12,
     maxSimulationTime: maxSimulationTime,
+    // infinite: true,
     nestingFactor: 0.001,
     // idealEdgeLength: 6000,
     // idealEdgeLength: function( edge ){ return 60000 / (2 ** (avgValue('depth', edge)))},
@@ -68,7 +70,7 @@ function calcOpacity(depth, zoom) {
     // console.log(zoomDiff)
     // const opacity = (0.5/zoomDiff + zoom/1.1)/1.2;
     const opacity = (0.5/zoomDiff + zoomRoot/1.1)/2.2;
-    return opacity === null ? 0.61 : Math.max(Math.min(opacity, 1), 0);
+    return opacity === null ? DEFAULT_OPACITY : Math.max(Math.min(opacity, 1), 0);
 }
 window.calcOpacity = calcOpacity;
 
@@ -81,8 +83,8 @@ const style = [
             'color': '#fff',
             'width': ele => SCALE * 150 / (2 ** (ele.data('depth'))),
             'height': ele => SCALE * 150 / (2 ** (ele.data('depth'))),
-            'opacity': ele => ele.data('op') || 0.61,
-            'text-opacity': ele => ele.data('op') || 0.61,
+            'opacity': ele => ele.data('op') || DEFAULT_OPACITY,
+            'text-opacity': ele => ele.data('op') || DEFAULT_OPACITY,
             'font-size': ele => SCALE * 40 / (2 ** (ele.data('depth'))),
         },
     },
@@ -92,7 +94,7 @@ const style = [
             'line-color': '#7FDBFF',
             'target-arrow-color': '#7FDBFF',
             'target-arrow-shape': 'triangle',
-            'opacity': ele => avgValue('op', ele),
+            'opacity': ele => avgValue('op', ele) || DEFAULT_OPACITY,
             'width': ele => {return SCALE * 1 / (2 ** (avgValue('depth', ele)))},
         },
     },
@@ -288,6 +290,9 @@ function CytoComponent() {
                 content.style.borderRadius = '10px';
 
                 content.innerHTML += `<strong style="text-align:center">${node.id()}<strong><br/>`;
+                
+                // take last element from path
+                // let lastPath = node.data('path').split(' > ').slice(-1);
                 content.innerHTML += `<a target="_blank" href="https://www.google.com/search?q=${node.id()}">Google</a> - `;
                 content.innerHTML += `<a target="_blank" href="https://en.wikipedia.org/w/index.php?search=${node.id()}">Wikipedia</a> - `;
                 content.innerHTML += `<a target="_blank" href="https://scholar.google.com/scholar?q=${node.id()}">Scholar</a> - `;
@@ -366,20 +371,22 @@ window.fetchSubTopics = fetchSubTopics;
 
 function addNodesToParent(cy, parents, children) {
     if(parents.length == 0 || children.length == 0) { return ; }
-    const bb = parents[0].position();
-    const ext = cy.extent()
-
+    const parent = parents[0]
+    const bb = parent.position();
+    // const ext = cy.extent()
+    // debugger;
     children.forEach(n => {
         if(n.target || n.source) { 
             return;
         }
-        // n['data']['parent'] = node.data('id');
+        // n['data']['parent'] = parent.data('id');
         // set x and y
         
         // const x = bb.x + (Math.random()*SCALE);
         // const y = bb.y + (Math.random()*SCALE);
         // NOTE : this is a hack to get the nodes to render in the right place - using cola layout..
         n['position'] = { x:bb.x, y:bb.y };
+        // n['data']['position'] = { x:bb.x, y:bb.y };
         // n['position'] = { x:(ext.x2 - ext.x1)/2 + ext.x1-10000, y:(ext.y2 - ext.y1)/2 + ext.y1-10000 };
         // n['renderedPosition'] = { x:0, y:0 };
     })
@@ -400,7 +407,7 @@ function addNodesToParent(cy, parents, children) {
         // setTimeout(() => {cy.layout({...layout, ...{idealEdgeLength: 0.1, maxSimulationTime: 3000, nodeRepulsion:0, nodeSpacing:0}}).run();}, 10)
         if (!window.RUNNING) {
             window.RUNNING = true;
-            cy.layout({...layout, ...{maxSimulationTime: maxSimulationTime*2}}).run();
+            cy.layout({...layout, ...{maxSimulationTime: maxSimulationTime*2, nestingFactor:layout['nestingFactor']/10}}).run();
         }
         
         setTimeout(() => {parents.forEach(node => node.unlock())}, maxSimulationTime*1);

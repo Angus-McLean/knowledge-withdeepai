@@ -11,7 +11,7 @@ function convertNestedObjectToChildren(datanew) {
     });
     datanew = {
         "topic": datanew['name'],
-        "path": datanew['path'],
+        "path": datanew['path'] || '_',
         "subtopics": subtopicsArr
     }
     return datanew;
