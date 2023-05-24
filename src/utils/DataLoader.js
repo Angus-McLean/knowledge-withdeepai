@@ -69,15 +69,26 @@ class DataLoader {
         return [...elements.nodes, ...elements.edges];
     }
 
+    
+
     toCytoElements(data, depth = 1) {
         // create nodes at current level. And create edges from current to sub nodes
         const arrNodes = [];
         const arrEdges = [];
 
         data.forEach((d) => {
-            arrNodes.push({ data: { id: d.topic, label: d.topic, depth: depth, path: d.path} });
+            // if (d.path === '_') return;
+            arrNodes.push({ data: { 
+                id: dataToId(d), name: d.topic, 
+                depth: depth,
+                path: d.path
+            } });
             let edges = (d.subtopics||[]).map(a => {
-                return {data:{id:d.topic+'-'+a.topic, source:d.topic, target:a.topic}}
+                return {data:{
+                    id:dataToId(d)+'-'+dataToId(a), 
+                    source:dataToId(d), 
+                    target:dataToId(a)
+                }}
             })
             arrEdges.push(...edges);
             let subElems = this.toCytoElements(d.subtopics||[], depth + 1)
@@ -90,6 +101,10 @@ class DataLoader {
             edges: arrEdges
         }
     }
+}
+
+function dataToId(data) {
+    return data.path + ' > ' + data.topic
 }
 
 window.DataLoader = DataLoader;

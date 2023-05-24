@@ -74,7 +74,8 @@ const layout = {
     randomize: false,
     convergenceThreshold: 0.00001,
     avoidOverlap: false,
-    nodeSpacing: SCALE * 100,
+    // nodeSpacing: SCALE * 100,
+    nodeSpacing: function( n ){ return SCALE * 100 / (3.8 ** (n.data('depth')))},
     // nodeRepulsion: 0.5,
     nodeRepulsion: function( n ){ return SCALE / 100 / (3.8 ** (n.data('depth')))},
     // nodeRepulsion: function( node ){ return SCALE / (10 * 1.8 ** (node.data('depth')))},
@@ -117,7 +118,7 @@ const style = [
         selector: 'node',
         style: {
             'background-color': '#0074D9',
-            'label': 'data(label)',
+            'label': 'data(name)',
             'color': '#fff',
             'width': ele => SCALE * 150 / (2 ** (ele.data('depth'))),
             'height': ele => SCALE * 150 / (2 ** (ele.data('depth'))),
@@ -201,10 +202,10 @@ function CytoComponent() {
                 updateNodeClasses(cyRef.current);
 
                 if (cyRef.current.nodes().length == 0) {
-                    // setTimeout(() => {
-                    //     console.log('STARTING LAYOUT', layout);
-                    //     cyRef.current.layout(layout).run()
-                    // }, 10000);
+                    setTimeout(() => {
+                        console.log('STARTING LAYOUT', layout);
+                        cyRef.current.layout(layout).run()
+                    }, 1000);
                 } else {
                     cyRef.current.layout(layout).run()
                     // cyRef.current.zoom(40)
@@ -252,7 +253,7 @@ function CytoComponent() {
                     nodesToFetch = nodesToFetch.slice(0, 4)
                     // const leaf_topics = window.Data.getSubTopics(cyRef.data).filter(a => a.subtopics?.length == 0).map(a=> a.topic)
                     // nodesToFetch = nodesToFetch.filter(node => leaf_topics.includes(node.data('id')));
-                    console.log('nodesToFetch', nodesToFetch.map(node => node.data('id')));
+                    console.log('nodesToFetch', nodesToFetch.map(node => node.data('name')));
                     var fetchProms = nodesToFetch.map(node => {
                         return fetchSubTopics(node).then(resp => {
                             if (resp?.length > 1) {console.log('Fetched SubTopics', node, resp)}
@@ -283,7 +284,6 @@ function CytoComponent() {
             cyRef.current.on('tap', 'node', (evt) => {
                 const node = evt.target;
                 console.log('tapped on node', node);
-                // alert(`Tapped on node with ID: ${node.id()}`);
                 // fetchSubTopics(node);
                 createHoverForNode(node);
             });
@@ -327,14 +327,14 @@ function CytoComponent() {
                 content.style.textAlign = 'center';
                 content.style.borderRadius = '10px';
 
-                content.innerHTML += `<strong style="text-align:center">${node.id()}<strong><br/>`;
+                content.innerHTML += `<strong style="text-align:center">${node.data('name')}<strong><br/>`;
                 
                 // take last element from path
                 // let lastPath = node.data('path').split(' > ').slice(-1);
-                content.innerHTML += `<a target="_blank" href="https://www.google.com/search?q=${node.id()}">Google</a> - `;
-                content.innerHTML += `<a target="_blank" href="https://en.wikipedia.org/w/index.php?search=${node.id()}">Wikipedia</a> - `;
-                content.innerHTML += `<a target="_blank" href="https://scholar.google.com/scholar?q=${node.id()}">Scholar</a> - `;
-                content.innerHTML += `<a target="_blank" href="https://www.youtube.com/results?search_query=${node.id()}">Youtube</a>`;
+                content.innerHTML += `<a target="_blank" href="https://www.google.com/search?q=${node.data('name')}">Google</a> - `;
+                content.innerHTML += `<a target="_blank" href="https://en.wikipedia.org/w/index.php?search=${node.data('name')}">Wikipedia</a> - `;
+                content.innerHTML += `<a target="_blank" href="https://scholar.google.com/scholar?q=${node.data('name')}">Scholar</a> - `;
+                content.innerHTML += `<a target="_blank" href="https://www.youtube.com/results?search_query=${node.data('name')}">Youtube</a>`;
 
                 return content;
             }
@@ -378,7 +378,7 @@ function fetchSubTopicsData(node) {
     // path to url
     // All Knowledge > Social Sciences > Psychology
     const topic_path = node.data('path');
-    const url = rootPath + topic_path.split(' > ').join('/') + '/' + node.data('id') + '/data.json';
+    const url = rootPath + topic_path.split(' > ').join('/') + '/' + node.data('name') + '/data.json';
     // fetchAndAddNodes(window.cyRef.current, url);
 
     return Data.getData(url).then(res => {
@@ -393,13 +393,13 @@ function fetchSubTopics(node) {
     // path to url
     // All Knowledge > Social Sciences > Psychology
     const topic_path = node.data('path');
-    const url = rootPath + topic_path.split(' > ').join('/') + '/' + node.data('id') + '/data.json';
+    const url = rootPath + topic_path.split(' > ').join('/') + '/' + node.data('name') + '/data.json';
     // fetchAndAddNodes(window.cyRef.current, url);
 
     return fetchSubTopicsData(node).then(res => {
         // cy.nodes().forEach(node => node.lock());
 
-        var newCytoData = Data.getCytoData(res, node.data('depth'));
+        var newCytoData = Data.getCytoData(res, node.data('depth')+1);
         
         return newCytoData
     })
