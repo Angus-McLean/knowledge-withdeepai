@@ -3,11 +3,46 @@
 Interactively navigate the world of human knowledge
 
 # Todos
-- Dynamically add nodes
-    - 
+- Improve - New Nodes
+    - Run Layout only against new nodes
+        - First run with very small edge length
+        - Wait layout-finish (with promise) then(run regular layout against nodes)
+- Refactor & Clean
 
-- 
+# Feature Ideas!
+- Dragged nodes
+    - Run layout against children
+- Node Selection & Styles
+- Context Menu
+- Keep special characters
+    - Add a json field for 'full-name' or something
+- Change paths to use '/' seperator
+- Don't lock nodes...
+- Status of each node (loaded, loading, leaf/queued, tbd)
+    - Little notification when new nodes are fetched etc
+- Click for force fetch subtopics
+    - Sometimes zooming doesn't work??
+- Keyboard to pan
+- Search
+    - Keyword
+    - Proximity (embedding)
+- Interactive Infos
+    - Use chatGPT3 for quick summaries / description?
+    - Or "Activities" / "How to conduct this work" / "How to get started"
+    - Select Multiple Items
+        - How are they related?
+- Better Batched Searching
+    - Daily cron - to fire up and run a search
+- Crowd-Source
+    - People can run locally
+    - Contribute an API token
+    - Add Notes, Relevant Links
+    - Suggest Nodes & Edges
+- Sidebar
+    - Details from Selected Nodes
+
 # DONE
+- Fix Node IDs - Uses path
 - Dynamically add nodes
     - Better functions
     - handle freeze & add
