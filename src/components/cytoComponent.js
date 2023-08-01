@@ -87,7 +87,7 @@ const layout = {
     // idealEdgeLength: function( edge ){ return 60000 / (2 ** (avgValue('depth', edge)))},
     // idealEdgeLength: function( edge ){ return 60000 / (2 ** (avgValue('depth', edge)))},
     // idealEdgeLength: function( edge ){ return SCALE * 300 / (1.8 ** (avgValue('depth', edge)))},
-    edgeLength: function( edge ){ return SCALE * 300 / (1.85 ** (avgValue('depth', edge)))},
+    edgeLength: function( edge ){ return SCALE * 400 / (2 ** (avgValue('depth', edge)))},
     centerGraph: true,
     fit: false,
 };
@@ -248,6 +248,8 @@ function CytoComponent() {
                 // debugger;
                 const nodesInView = nodesInViewPort(cy);
                 var nodesToFetch = nodesInView.filter(n => !n.data('fetched'));
+                // nodesToFetch = nodesToFetch.filter(n => !n.children().legnth);           // TODO : fix this.. children elements don't show?
+                // nodesToFetch = nodesToFetch.filter(n => n.neighborhood().filter(a=>a).legnth == 1);
                 
                 if (nodesInView.length < 20 && nodesToFetch.length > 0 && nodesToFetch.length < 10) {
                     nodesToFetch = nodesToFetch.slice(0, 4)
@@ -255,20 +257,63 @@ function CytoComponent() {
                     // nodesToFetch = nodesToFetch.filter(node => leaf_topics.includes(node.data('id')));
                     console.log('nodesToFetch', nodesToFetch.map(node => node.data('name')));
                     var fetchProms = nodesToFetch.map(node => {
+                        node.data('fetched', true);
                         return fetchSubTopics(node).then(resp => {
                             if (resp?.length > 1) {console.log('Fetched SubTopics', node, resp)}
-                            node.data('fetched', true);
                             return [node, resp]})
                     })
-                    Promise.all(fetchProms).then((resp) => {
-                        // debugger
-                        const parents = resp.map(a => a[0])
-                        const children = resp.flatMap(a => a[1])
-                        const parentIds = parents.map(p=>p.id())
-                        const childrenOnly = children.filter(c => !parentIds.includes(c.data.id))
-                        addNodesToParent(cy, parents, childrenOnly);
-                        setTimeout(() => window.RUNNING = false, maxSimulationTime);
+                    fetchProms.forEach(function (p){
+                        p.then((resp) => {
+                            // debugger
+    
+                            var parentNode = resp[0]
+                            var childrenData = resp[1]
+                            childrenData = childrenData.filter(c => c.data.id != parentNode.id())
+                            if (!parentNode || childrenData.length == 0) {
+                                return 
+                            }
+                            var bb = parentNode.position();
+                            childrenData.forEach(n => {
+                                if(n.target || n.source) { return;}
+                                n['position'] = { x:bb.x, y:bb.y };
+                            })
+    
+                            var childNodes = cyRef.current.add(childrenData);
+                            parentNode.lock()
+                            let layoutRun = childNodes.neighbourhood().neighbourhood().layout({
+                                ...layout, 
+                                ...{
+                                    animate: true,
+                                    avoidOverlap: true,
+                                    convergenceThreshold: 0.00001,
+                                    // infinite: true,
+                                    maxSimulationTime: 1e5,
+                                    centerGraph: false,
+                                    nestingFactor: layout['nestingFactor']*10
+                                }
+                            }).run()
+                            setTimeout(() => parentNode.unlock(), 1000)
+                            // layoutRun.pon('end').then(p => {
+                            //     console.log('simulation end - unlocking')
+                            //     parentNode.unlock()
+                            // })
+                            
+                        }).catch(p => console.warn('Failed to fetch', p))
                     })
+
+                    // Promise.all(fetchProms).then(() => {
+                    //     nodesToFetch.neighbourhood().layout({
+                    //         ...layout, 
+                    //         ...{
+                    //             // animate: false,
+                    //             avoidOverlap: true,
+                    //             infinite: true,
+                    //             // maxSimulationTime: 
+                    //             centerGraph: false,
+                    //             nestingFactor: layout['nestingFactor']*10
+                    //         }
+                    //     }).run()
+                    // })
                 }
             }
             const debouncedConditionallyFetchTopis = throttle(conditionallyFetchTopis, 1000, { leading: true, trailing: true });
@@ -430,11 +475,9 @@ function addNodesToParent(cy, parents, children) {
     })
     
     
-    // parents.forEach(n => n.lock());        // relock the parent node
-    // var childrenOnly = children.filter(c => parents.map(p=>p.id()).includes(c.id))
-    if (!window.RUNNING) {
-        cy.nodes().forEach(node => node.lock());
-    }
+    // if (!window.RUNNING) {
+    //     cy.nodes().forEach(node => node.lock());
+    // }
     // cy.layout({...layout, ...{name:'preset', fit:false }}).run();
     setTimeout(() => {
         cy.add(children);
@@ -445,7 +488,8 @@ function addNodesToParent(cy, parents, children) {
         // setTimeout(() => {cy.layout({...layout, ...{idealEdgeLength: 0.1, maxSimulationTime: 3000, nodeRepulsion:0, nodeSpacing:0}}).run();}, 10)
         if (!window.RUNNING) {
             window.RUNNING = true;
-            cy.layout({...layout, ...{maxSimulationTime: maxSimulationTime*2, nestingFactor:layout['nestingFactor']/10}}).run();
+            // cy.layout({...layout, ...{maxSimulationTime: maxSimulationTime*2, nestingFactor:layout['nestingFactor']/10}}).run();
+            // children.layout({...layout, ...{maxSimulationTime: maxSimulationTime*2, nestingFactor:layout['nestingFactor']/10}}).run();
         }
         
         setTimeout(() => {parents.forEach(node => node.unlock())}, maxSimulationTime*1);
