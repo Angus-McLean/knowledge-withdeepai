@@ -117,7 +117,9 @@ const style = [
     {
         selector: 'node',
         style: {
-            'background-color': '#0074D9',
+            // 'background-color': '#0074D9',
+            // green if fetched
+            'background-color': ele => ele.data('fetched') ? '#2ECC40' : '#0074D9', 
             'label': 'data(name)',
             'color': '#fff',
             'width': ele => SCALE * 150 / (2 ** (ele.data('depth'))),
@@ -323,17 +325,131 @@ function CytoComponent() {
 
 
 
-    // click handler
+    // click handler & Double Click
     useEffect(() => {
         if (cyRef.current) {
-            cyRef.current.on('tap', 'node', (evt) => {
-                const node = evt.target;
-                console.log('tapped on node', node);
-                // fetchSubTopics(node);
-                createHoverForNode(node);
+            // cyRef.current.on('tap', 'node', (evt) => {
+            //     const node = evt.target;
+            //     console.log('tapped on node', node);
+            //     // fetchSubTopics(node);
+            //     createHoverForNode(node);
+            // });
+
+            var tappedBefore;
+            var tappedTimeout;
+            cyRef.current.on('tap', function(event) {
+                var tappedNow = event.target;
+                if (tappedTimeout && tappedBefore) {
+                    clearTimeout(tappedTimeout);
+                }
+                if(tappedBefore === tappedNow) {
+
+                    const node = event.target;
+                    console.log('double tapped on node', node);
+                    // fetchSubTopics(node);
+                    // createHoverForNode(node);
+                    removeHoverForNode(node);
+
+                    tappedNow.trigger('doubleTap');
+                    tappedBefore = null;
+                } else {
+                    tappedTimeout = setTimeout(function(){ tappedBefore = null; }, 300);
+                    tappedBefore = tappedNow;
+                    
+                    const node = event.target;
+                    if(!node.isNode || !node.isNode()) { return; }
+                    console.log('tapped on node', node);
+                    // // fetchSubTopics(node);
+                    createHoverForNode(node);
+
+                }
             });
+
+            cyRef.current.on('doubleTap', 'node', (evt) => {
+                const node = evt.target;
+                console.log('doubleTap on node', node);
+                // fetchSubTopics(node);
+                // Display modal for 'JavaScript' Wikipedia page
+                displayModalWithIntroAndImage(node.data().name);
+            });
+
         }
     }, []);
+
+    async function fetchIntroBlurbAndImage(pageTitle) {
+        const url = `https://en.wikipedia.org/w/api.php?format=json&origin=*&action=query&prop=extracts|pageimages&exintro&explaintext&redirects=1&titles=${encodeURIComponent(pageTitle)}&piprop=original`;
+    
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const json = await response.json();
+            const pages = json.query.pages;
+            const pageId = Object.keys(pages)[0]; 
+            return {
+                text: pages[pageId].extract,
+                image: pages[pageId].original ? pages[pageId].original.source : null
+            };
+        } catch (error) {
+            console.log(error);
+        }
+    }
+    
+    async function displayModalWithIntroAndImage(pageTitle) {
+        const { text, image } = await fetchIntroBlurbAndImage(pageTitle);
+        
+        // Create modal
+        const modal = document.createElement('div');
+        modal.style.position = 'fixed';
+        modal.style.top = '50%';
+        modal.style.left = '50%';
+        modal.style.transform = 'translate(-50%, -50%)';
+        modal.style.backgroundColor = '#fff';
+        modal.style.padding = '20px';
+        modal.style.maxWidth = '80%';
+        modal.style.maxHeight = '60%';
+        modal.style.overflow = 'scroll';
+        modal.style.zIndex = '1000';
+    
+        // Add close button
+        const closeButton = document.createElement('div');
+        closeButton.textContent = 'X';
+        closeButton.style.float = 'right';
+        closeButton.addEventListener('click', () => document.body.removeChild(modal));
+        modal.appendChild(closeButton);
+
+        // Add image to modal
+        if (image) {
+            const img = document.createElement('img');
+            img.src = image;
+            img.style.width = '50%';
+            img.style.height = 'auto';
+            img.style.float = 'left';
+            modal.appendChild(img);
+        }
+    
+        // Add text to modal
+        const p = document.createElement('p');
+        p.textContent = text;
+        modal.appendChild(p);
+    
+        // Add modal to page
+        document.body.appendChild(modal);
+    }
+    
+    // highlight node border or remove highlight
+    function toggleHighlightNodeBorder(node) {
+        if (node.data('highlighted')) {
+            node.style('border-width', 0);
+            node.data('highlighted', false);
+        } else {
+            node.style('border-width', 50);
+            node.style('border-color', 'white');
+            node.data('highlighted', true);
+        }
+    }
+
 
     function createHoverForNode(node) {
         if(document.getElementById('tippyElement')) {
@@ -390,16 +506,21 @@ function CytoComponent() {
 
     }
 
+    function removeHoverForNode(node) {
+        document.getElementById('tippyElement')?.tippy?.destroy();
+        document.getElementById('tippyElement')?.remove();
+    }
 
     // hover handler
     useEffect(() => {
         if (cyRef.current) {
             cyRef.current.on('mouseover', 'node', (evt) => {
-                createHoverForNode(evt.target);
+                // createHoverForNode(evt.target);
+                toggleHighlightNodeBorder(evt.target);
             })
             cyRef.current.on('mouseout', 'node', (evt) => {
-                document.getElementById('tippyElement')?.tippy?.destroy();
-                document.getElementById('tippyElement')?.remove();
+                toggleHighlightNodeBorder(evt.target);
+                // removeHoverForNode(evt.target);
             })
         }
     }, []);
