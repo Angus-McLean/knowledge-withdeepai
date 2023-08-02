@@ -267,34 +267,9 @@ function CytoComponent() {
                     fetchProms.forEach(function (p){
                         p.then((resp) => {
                             // debugger
-    
-                            var parentNode = resp[0]
-                            var childrenData = resp[1]
-                            childrenData = childrenData.filter(c => c.data.id != parentNode.id())
-                            if (!parentNode || childrenData.length == 0) {
-                                return 
-                            }
-                            var bb = parentNode.position();
-                            childrenData.forEach(n => {
-                                if(n.target || n.source) { return;}
-                                n['position'] = { x:bb.x, y:bb.y };
-                            })
-    
-                            var childNodes = cyRef.current.add(childrenData);
-                            parentNode.lock()
-                            let layoutRun = childNodes.neighbourhood().neighbourhood().layout({
-                                ...layout, 
-                                ...{
-                                    animate: true,
-                                    avoidOverlap: true,
-                                    convergenceThreshold: 0.00001,
-                                    // infinite: true,
-                                    maxSimulationTime: 1e5,
-                                    centerGraph: false,
-                                    nestingFactor: layout['nestingFactor']*10
-                                }
-                            }).run()
-                            setTimeout(() => parentNode.unlock(), 1000)
+                            
+                            addNodesToParent(cy, resp[0], resp[1]);
+                            
                             // layoutRun.pon('end').then(p => {
                             //     console.log('simulation end - unlocking')
                             //     parentNode.unlock()
@@ -357,11 +332,24 @@ function CytoComponent() {
                     tappedBefore = tappedNow;
                     
                     const node = event.target;
-                    if(!node.isNode || !node.isNode()) { return; }
+                    if(!node.isNode || !node.isNode()) { 
+                        removeHighlightFromNodes();
+                        return; 
+                    }
                     console.log('tapped on node', node);
-                    // // fetchSubTopics(node);
                     createHoverForNode(node);
+                    highlightNeighbours(node);
 
+                    if (node.data('fetched')) { return; }
+                    node.data('fetched', true)
+                    var fetchProm = fetchSubTopics(node).then(resp => {
+                        if (resp?.length > 1) {console.log('Fetched SubTopics', node, resp)}
+                        return [node, resp]
+                    })
+
+                    fetchProm.then((resp) => {
+                        addNodesToParent(cyRef.current, resp[0], resp[1]);
+                    }).catch(p => console.warn('Failed to fetch', p))
                 }
             });
 
@@ -375,6 +363,17 @@ function CytoComponent() {
 
         }
     }, []);
+
+    // highlight neighbours
+    function highlightNeighbours(node) {
+        node.neighborhood().forEach(node => toggleHighlightNodeBorder(node));
+    }
+
+    // remove highlighting from nodes
+    function removeHighlightFromNodes() {
+        var highlightedNodes = cyRef.current.nodes().filter(node => node.data('highlighted'));
+        highlightedNodes.forEach(node => toggleHighlightNodeBorder(node));
+    }
 
     async function fetchIntroBlurbAndImage(pageTitle) {
         const url = `https://en.wikipedia.org/w/api.php?format=json&origin=*&action=query&prop=extracts|pageimages&exintro&explaintext&redirects=1&titles=${encodeURIComponent(pageTitle)}&piprop=original`;
@@ -442,10 +441,19 @@ function CytoComponent() {
     function toggleHighlightNodeBorder(node) {
         if (node.data('highlighted')) {
             node.style('border-width', 0);
+            node.style('font-weight', 'normal');
+            // node.style('opacity', node.data('opacity_pre'))
+            node.style('opacity', style[0].style.opacity)
+            
             node.data('highlighted', false);
         } else {
-            node.style('border-width', 50);
+            var borderWidth = 100/(node.data('depth')||2);
+            node.style('border-width', borderWidth);
             node.style('border-color', 'white');
+            node.style('font-weight', 'bold');
+            node.data('opacity_pre', node.data('opacity'))
+            node.style('opacity', 1);
+
             node.data('highlighted', true);
         }
     }
@@ -573,7 +581,38 @@ function fetchSubTopics(node) {
 window.fetchSubTopics = fetchSubTopics;
 
 
-function addNodesToParent(cy, parents, children) {
+function addNodesToParent(cy, parent, children) {
+
+    // var parentNode = resp[0]
+    // var children = resp[1]
+    children = children.filter(c => c.data.id != parent.id())
+    if (!parent || children.length == 0) {
+        return 
+    }
+    var bb = parent.position();
+    children.forEach(n => {
+        if(n.target || n.source) { return;}
+        n['position'] = { x:bb.x, y:bb.y };
+    })
+
+    var childNodes = cy.add(children);
+    parent.lock()
+    let layoutRun = childNodes.neighbourhood().neighbourhood().layout({
+        ...layout, 
+        ...{
+            animate: true,
+            avoidOverlap: false,
+            convergenceThreshold: 0.00001,
+            // infinite: true,
+            maxSimulationTime: 1e5,
+            centerGraph: false,
+            nestingFactor: layout['nestingFactor']*10
+        }
+    }).run()
+    setTimeout(() => parent.unlock(), 1000)
+}
+
+function addNodesToParent_old(cy, parents, children) {
     if(parents.length == 0 || children.length == 0) { return ; }
     const parent = parents[0]
     const bb = parent.position();
