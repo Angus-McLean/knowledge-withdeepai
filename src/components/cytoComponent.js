@@ -334,6 +334,8 @@ function CytoComponent() {
                     const node = event.target;
                     if(!node.isNode || !node.isNode()) { 
                         removeHighlightFromNodes();
+                        // remove modal window if exists
+                        document.getElementById('info-modal')?.remove();
                         return; 
                     }
                     console.log('tapped on node', node);
@@ -386,6 +388,26 @@ function CytoComponent() {
             const json = await response.json();
             const pages = json.query.pages;
             const pageId = Object.keys(pages)[0]; 
+
+            if (pageId == '-1') {
+                // return {
+                //     text: 'No information found for this topic.',
+                //     image: null
+                // };
+                // if page doesn't existing query wikipedia and return first result
+                const url = `https://en.wikipedia.org/w/api.php?format=json&origin=*&action=query&list=search&srsearch=${encodeURIComponent(pageTitle)}`;
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const json = await response.json();
+                const pages = json.query.search;
+                const pageId = Object.keys(pages)[0];
+                const title = pages[pageId].title;
+                return fetchIntroBlurbAndImage(title);
+
+            }
+
             return {
                 text: pages[pageId].extract,
                 image: pages[pageId].original ? pages[pageId].original.source : null
@@ -400,6 +422,7 @@ function CytoComponent() {
         
         // Create modal
         const modal = document.createElement('div');
+        modal.id = 'info-modal';
         modal.style.position = 'fixed';
         modal.style.top = '50%';
         modal.style.left = '50%';
@@ -410,13 +433,19 @@ function CytoComponent() {
         modal.style.maxHeight = '60%';
         modal.style.overflow = 'scroll';
         modal.style.zIndex = '1000';
-    
+        
         // Add close button
         const closeButton = document.createElement('div');
         closeButton.textContent = 'X';
         closeButton.style.float = 'right';
         closeButton.addEventListener('click', () => document.body.removeChild(modal));
         modal.appendChild(closeButton);
+        
+        // add centered title
+        const title = document.createElement('h2');
+        title.textContent = pageTitle;
+        title.style.textAlign = 'center';
+        modal.appendChild(title);
 
         // Add image to modal
         if (image) {
@@ -425,11 +454,13 @@ function CytoComponent() {
             img.style.width = '50%';
             img.style.height = 'auto';
             img.style.float = 'left';
+            img.style.marginRight = '10px';
             modal.appendChild(img);
         }
     
         // Add text to modal
         const p = document.createElement('p');
+        p.style.textIndent = "30px"
         p.textContent = text;
         modal.appendChild(p);
     
